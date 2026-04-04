@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Detail — Sigilith-M{% endblock %}
+
+{% block header %}
+Analysis Detail
+{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h2>Analysis Result</h2>
+
+    {% if analysis %}
+        <div class="details-grid">
+            <!-- Metadata -->
+            <div class="detail-card">
+                <h3>Metadata</h3>
+                <dl>
+                    <dt>ID</dt>
+                    <dd><code>{{ analysis.id }}</code></dd>
+                    <dt>Timestamp</dt>
+                    <dd>{{ analysis.timestamp }}</dd>
+                    <dt>File Path</dt>
+                    <dd><code>{{ analysis.file_path }}</code></dd>
+                </dl>
+            </div>
+
+            <!-- Risk Assessment -->
+            <div class="detail-card">
+                <h3>Risk Assessment</h3>
+                <dl>
+                    <dt>Risk Level</dt>
+                    <dd><strong>{{ analysis.risk }}</strong></dd>
+                    <dt>Score</dt>
+                    <dd>{{ analysis.risk_score }}</dd>
+                </dl>
+            </div>
+
+            <!-- Signature -->
+            <div class="detail-card">
+                <h3>Behavioral Signature</h3>
+                <dl>
+                    <dt>Regime Class</dt>
+                    <dd>{{ analysis.regime_class }}</dd>
+                    <dt>Entropy</dt>
+                    <dd>{{ analysis.entropy }}</dd>
+                    <dt>Transition Density</dt>
+                    <dd>{{ analysis.transition_density }}</dd>
+                </dl>
+            </div>
+
+            <!-- Vector -->
+            <div class="detail-card">
+                <h3>Vector Representation</h3>
+                <p class="subtitle">Dimension: {{ analysis.vector|length }}</p>
+                <div class="vector-display">
+                    <code>{{ analysis.vector|join(', ')|truncate(200) }}</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <a href="/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+        </div>
+    {% else %}
+        <div class="alert alert-error">
+            <p>Analysis not found.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
