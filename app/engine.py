@@ -3,6 +3,7 @@ from app.segmentation import segment_sequence
 from app.transforms import apply_transforms
 from app.signature import compute_signature
 from app.scoring import compute_risk_score
+from app.vectorize import signature_to_vector
 
 def generate_summary(signature, risk):
     if risk["risk"] == "HIGH":
@@ -28,8 +29,12 @@ def analyze_sequence(sequence: list[str]) -> dict:
     # Step 4: risk scoring
     risk = compute_risk_score(signature)
 
+    # Step 5: vectorization
+    vector = signature_to_vector(signature)
+
     return {
         "signature": signature,
+        "vector": vector.tolist(),
         "risk": risk,
         "summary": generate_summary(signature, risk)
     }
