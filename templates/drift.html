@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Drift — Sigilith-M{% endblock %}
+
+{% block header %}
+Drift Analysis
+{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h2>Behavioral Drift Trajectory</h2>
+
+    {% if drift_trajectory %}
+        <div class="drift-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Step</th>
+                        <th>Timestamp</th>
+                        <th>Regime</th>
+                        <th>Entropy</th>
+                        <th>Drift Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for step in drift_trajectory %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ step.timestamp }}</td>
+                        <td>{{ step.regime }}</td>
+                        <td>{{ (step.entropy)|round(4) }}</td>
+                        <td>
+                            <span class="drift-indicator" style="color: {% if step.drift_score > 0.7 %}red{% elif step.drift_score > 0.4 %}orange{% else %}green{% endif %};">
+                                {{ (step.drift_score)|round(4) }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="drift-summary">
+                <h3>Summary</h3>
+                <dl>
+                    <dt>Total Steps</dt>
+                    <dd>{{ drift_trajectory|length }}</dd>
+                    <dt>Regime Changes</dt>
+                    <dd>{{ regime_changes }}</dd>
+                    <dt>Average Drift</dt>
+                    <dd>{{ (avg_drift)|round(4) }}</dd>
+                    <dt>Max Drift</dt>
+                    <dd>{{ (max_drift)|round(4) }}</dd>
+                </dl>
+            </div>
+        </div>
+    {% else %}
+        <p>No drift trajectory computed yet. Store multiple analyses first.</p>
+    {% endif %}
+</section>
+
+<div class="button-group">
+    <a href="/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
+{% endblock %}
