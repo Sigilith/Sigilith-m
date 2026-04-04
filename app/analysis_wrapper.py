@@ -1,18 +1,21 @@
-import datetime
+def normalize_risk(risk_value):
+    # Implement the logic to normalize the risk value
+    normalized_value = risk_value / 100  # Example normalization
+    return normalized_value
 
 
-def analyze_sequence_wrapper(sequence):
-    # Assuming analyze_sequence_core is the function that processes the sequence
-    analysis_output = analyze_sequence_core(sequence)
+def normalize_regime(regime_value):
+    # Implement the logic to normalize the regime value
+    normalized_value = (regime_value - 1) / 2  # Example normalization
+    return normalized_value
 
-    # Enrich the output with additional information
-    enriched_output = {
-        'id': sequence.id,
-        'timestamp': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
-        'entropy': analysis_output['entropy'],
-        'transition_density': analysis_output['transition_density'],
-        'risk_score': analysis_output['risk_score'],
-        'regime_class': analysis_output['regime_class'],
-        'analysis_result': analysis_output
+
+def wrap_analysis(analysis_data, config):
+    # Implement the logic for wrapping analysis with standardized object structure
+    standardized_structure = {
+        'normalized_risk': normalize_risk(analysis_data['risk']),
+        'normalized_regime': normalize_regime(analysis_data['regime']),
+        'analysis_result': analysis_data['result'],
+        'config': config
     }
-    return enriched_output
+    return standardized_structure
