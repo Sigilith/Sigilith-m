@@ -1,45 +1,86 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Cluster Visualization</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        #plot {
+            width: 100%;
+            height: 100vh;
+        }
+        .summary-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            box-shadow: 2px 2px 5px #aaa;
+        }
+    </style>
+</head>
+<body>
+    <h1>3D Cluster Visualization</h1>
+    <div id="plot"></div>
+    <div id="summary"></div>
+    <script>
+        // Sample data
+        const data = {
+            embeddings: [[1,2,3],[4,5,6],[7,8,9]], // Replace with actual vector embeddings
+            labels: [0, 1, 1], // Cluster labels
+            centroids: [[4,5,6],[1,2,3]] // Centroids
+        };
 
-{% block title %}Clusters — Sigilith-M{% endblock %}
+        // Prepare data for Plotly
+        const trace1 = {
+            x: data.embeddings.map(e => e[0]),
+            y: data.embeddings.map(e => e[1]),
+            z: data.embeddings.map(e => e[2]),
+            mode: 'markers',
+            type: 'scatter3d',
+            marker: {
+                size: 5,
+                color: data.labels,
+                colorscale: 'Viridis',
+                opacity: 0.8,
+                line: {
+                    width: 0.5
+                }
+            },
+            text: data.labels,
+            hoverinfo: 'text'
+        };
 
-{% block header %}
-Cluster Analysis
-{% endblock %}
+        const traces = [trace1];
 
-{% block content %}
-<section class="panel">
-    <h2>Vector Clusters</h2>
+        // Add centroid markers
+        data.centroids.forEach((centroid, index) => {
+            traces.push({
+                x: [centroid[0]],
+                y: [centroid[1]],
+                z: [centroid[2]],
+                mode: 'markers',
+                type: 'scatter3d',
+                marker: {
+                    size: 10,
+                    color: 'red',
+                    symbol: 'x'
+                },
+                name: `Centroid ${index}`
+            });
+        });
 
-    {% if clusters %}
-        <div class="clusters-container">
-            {% for cluster in clusters %}
-            <div class="cluster-card">
-                <h3>Cluster {{ loop.index }}</h3>
-                <dl>
-                    <dt>Members</dt>
-                    <dd>{{ cluster.size }}</dd>
-                    <dt>Centroid</dt>
-                    <dd><code>{{ cluster.centroid|join(', ')|truncate(150) }}</code></dd>
-                    <dt>Label</dt>
-                    <dd>{{ cluster.label }}</dd>
-                </dl>
-                <details>
-                    <summary>View Members</summary>
-                    <ul>
-                        {% for member in cluster.members %}
-                        <li><code>{{ member }}</code></li>
-                        {% endfor %}
-                    </ul>
-                </details>
-            </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p>No clusters computed yet. Store some analyses first.</p>
-    {% endif %}
-</section>
+        // Plotting
+        Plotly.newPlot('plot', traces);
 
-<div class="button-group">
-    <a href="/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
-</div>
-{% endblock %}
+        // Display summary cards
+        const summaryDiv = document.getElementById('summary');
+        data.labels.forEach((label, index) => {
+            const card = document.createElement('div');
+            card.classList.add('summary-card');
+            card.innerHTML = `<strong>Point ${index}</strong>: Cluster ${label}`;
+            summaryDiv.appendChild(card);
+        });
+    </script>
+</body>
+</html>
