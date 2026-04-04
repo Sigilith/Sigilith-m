@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Clusters — Sigilith-M{% endblock %}
+
+{% block header %}
+Cluster Analysis
+{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h2>Vector Clusters</h2>
+
+    {% if clusters %}
+        <div class="clusters-container">
+            {% for cluster in clusters %}
+            <div class="cluster-card">
+                <h3>Cluster {{ loop.index }}</h3>
+                <dl>
+                    <dt>Members</dt>
+                    <dd>{{ cluster.size }}</dd>
+                    <dt>Centroid</dt>
+                    <dd><code>{{ cluster.centroid|join(', ')|truncate(150) }}</code></dd>
+                    <dt>Label</dt>
+                    <dd>{{ cluster.label }}</dd>
+                </dl>
+                <details>
+                    <summary>View Members</summary>
+                    <ul>
+                        {% for member in cluster.members %}
+                        <li><code>{{ member }}</code></li>
+                        {% endfor %}
+                    </ul>
+                </details>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No clusters computed yet. Store some analyses first.</p>
+    {% endif %}
+</section>
+
+<div class="button-group">
+    <a href="/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
+{% endblock %}
