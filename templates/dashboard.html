@@ -3,69 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Dashboard</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>System Overview</title>
 </head>
 <body>
-    <h1>Dashboard</h1>
-    <div id="summary-statistics">
-        <h2>Summary Statistics</h2>
-        <p>Insert summary statistics here...</p>
-    </div>
-    <div id="risk-distribution">
-        <h2>Risk Distribution</h2>
-        <div id="risk-distribution-chart"></div>
-    </div>
-    <div id="regime-breakdown">
-        <h2>Regime Breakdown</h2>
-        <div id="regime-breakdown-chart"></div>
-    </div>
-    <div id="recent-analyses">
+    <h1>System Overview</h1>
+    <section id="risk-distributions">
+        <h2>Risk Distributions</h2>
+        <div>
+            <!-- Dynamic content will be inserted here -->
+            {% for risk in risks %}
+                <p>{{ risk.name }}: {{ risk.value }}%</p>
+            {% endfor %}
+        </div>
+    </section>
+    <section id="regime-distributions">
+        <h2>Regime Distributions</h2>
+        <div>
+            <!-- Dynamic content will be inserted here -->
+            {% for regime in regimes %}
+                <p>{{ regime.type }}: {{ regime.percentage }}%</p>
+            {% endfor %}
+        </div>
+    </section>
+    <section id="analysis-submission">
+        <h2>Submit Your Analysis</h2>
+        <form method="post" action="/submit-analysis">
+            <label for="analysis-name">Analysis Name:</label>
+            <input type="text" id="analysis-name" name="analysis-name" required><br>
+            <label for="analysis-data">Data:</label>
+            <textarea id="analysis-data" name="analysis-data" required></textarea><br>
+            <input type="submit" value="Submit">
+        </form>
+    </section>
+    <section id="recent-analyses">
         <h2>Recent Analyses</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Analysis</th>
-                    <th>Results</th>
+                    <th>Analysis Name</th>
+                    <th>Submission Date</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>2026-04-01</td>
-                    <td>Analysis A</td>
-                    <td>Results A</td>
-                </tr>
-                <tr>
-                    <td>2026-04-02</td>
-                    <td>Analysis B</td>
-                    <td>Results B</td>
-                </tr>
-                <tr>
-                    <td>2026-04-03</td>
-                    <td>Analysis C</td>
-                    <td>Results C</td>
-                </tr>
+                {% for analysis in recentAnalyses %}
+                    <tr>
+                        <td>{{ analysis.name }}</td>
+                        <td>{{ analysis.date }}</td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
-    </div>
-    <script>
-        // Example Plotly.js code for visualizations
-        var riskData = [{
-            labels: ['High Risk', 'Medium Risk', 'Low Risk'],
-            values: [19, 26, 55],
-            type: 'donut'
-        }];
-        var riskLayout = { title: 'Risk Distribution' };
-        Plotly.newPlot('risk-distribution-chart', riskData, riskLayout);
-
-        var regimeData = [{
-            x: ['Regime 1', 'Regime 2', 'Regime 3'],
-            y: [10, 15, 13],
-            type: 'bar'
-        }];
-        var regimeLayout = { title: 'Regime Breakdown' };
-        Plotly.newPlot('regime-breakdown-chart', regimeData, regimeLayout);
-    </script>
+    </section>
 </body>
 </html>
