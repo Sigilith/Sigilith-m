@@ -1,64 +1,86 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>Drift Analysis</title>
+</head>
+<body>
+    <h1>Drift Analysis Dashboard</h1>
+    <h2>Entropy Trajectory</h2>
+    <div id="entropy-trajectory"></div>
 
-{% block title %}Drift — Sigilith-M{% endblock %}
+    <h2>Drift Score Heatmap</h2>
+    <div id="drift-heatmap"></div>
 
-{% block header %}
-Drift Analysis
-{% endblock %}
+    <h2>Regime Change Detection</h2>
+    <div id="regime-change"></div>
 
-{% block content %}
-<section class="panel">
-    <h2>Behavioral Drift Trajectory</h2>
+    <h2>Summary Statistics</h2>
+    <div id="summary-statistics">
+        <table border="1">
+            <tr>
+                <th>Statistic</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>Mean</td>
+                <td><!-- Mean Value --></td>
+            </tr>
+            <tr>
+                <td>Standard Deviation</td>
+                <td><!-- Standard Deviation Value --></td>
+            </tr>
+            <tr>
+                <td>Min</td>
+                <td><!-- Minimum Value --></td>
+            </tr>
+            <tr>
+                <td>Max</td>
+                <td><!-- Maximum Value --></td>
+            </tr>
+        </table>
+    </div>
 
-    {% if drift_trajectory %}
-        <div class="drift-container">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Step</th>
-                        <th>Timestamp</th>
-                        <th>Regime</th>
-                        <th>Entropy</th>
-                        <th>Drift Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for step in drift_trajectory %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ step.timestamp }}</td>
-                        <td>{{ step.regime }}</td>
-                        <td>{{ (step.entropy)|round(4) }}</td>
-                        <td>
-                            <span class="drift-indicator" style="color: {% if step.drift_score > 0.7 %}red{% elif step.drift_score > 0.4 %}orange{% else %}green{% endif %};">
-                                {{ (step.drift_score)|round(4) }}
-                            </span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <script>
+        // Sample Data for Plotly Charts
+        const entropyData = [/* Your Entropy Trajectory Data */];
+        const driftData = [/* Your Drift Score Heatmap Data */];
+        const regimeData = [/* Your Regime Change Detection Data */];
 
-            <div class="drift-summary">
-                <h3>Summary</h3>
-                <dl>
-                    <dt>Total Steps</dt>
-                    <dd>{{ drift_trajectory|length }}</dd>
-                    <dt>Regime Changes</dt>
-                    <dd>{{ regime_changes }}</dd>
-                    <dt>Average Drift</dt>
-                    <dd>{{ (avg_drift)|round(4) }}</dd>
-                    <dt>Max Drift</dt>
-                    <dd>{{ (max_drift)|round(4) }}</dd>
-                </dl>
-            </div>
-        </div>
-    {% else %}
-        <p>No drift trajectory computed yet. Store multiple analyses first.</p>
-    {% endif %}
-</section>
+        // Plotly Entropy Trajectory
+        const entropyTrace = {
+            x: entropyData.map(d => d.x),
+            y: entropyData.map(d => d.y),
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Entropy Trajectory'
+        };
 
-<div class="button-group">
-    <a href="/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
-</div>
-{% endblock %}
+        Plotly.newPlot('entropy-trajectory', [entropyTrace]);
+
+        // Plotly Drift Score Heatmap
+        const heatmapTrace = {
+            z: driftData,
+            type: 'heatmap'
+        };
+
+        Plotly.newPlot('drift-heatmap', [heatmapTrace]);
+
+        // Plotly Regime Change Detection
+        const regimeTrace = {
+            x: regimeData.map(d => d.x),
+            y: regimeData.map(d => d.y),
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Regime Change'
+        };
+
+        Plotly.newPlot('regime-change', [regimeTrace]);
+
+        // Populate Summary Statistics
+        // This would usually be populated with actual data dynamically
+    </script>
+</body>
+</html>
