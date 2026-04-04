@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — Sigilith-M{% endblock %}
+
+{% block header %}
+Sigilith-M Dashboard
+{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h2>Stored Analyses</h2>
+
+    {% if analyses and analyses|length > 0 %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Timestamp</th>
+                    <th>Risk</th>
+                    <th>Regime</th>
+                    <th>View</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in analyses %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.timestamp }}</td>
+                    <td>{{ item.risk }}</td>
+                    <td>{{ item.regime_class }}</td>
+                    <td><a href="/dashboard/analysis/{{ item.id }}">Open</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No analyses have been stored yet.</p>
+    {% endif %}
+</section>
+
+<section class="panel">
+    <h2>Tools</h2>
+    <ul>
+        <li><a href="/dashboard/clusters">View Clusters</a></li>
+        <li><a href="/dashboard/drift">View Drift</a></li>
+    </ul>
+</section>
+{% endblock %}
