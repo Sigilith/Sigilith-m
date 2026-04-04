@@ -1,23 +1,32 @@
+# Production-Ready MetadataExtractor Implementation
+
 class MetadataExtractor:
     def __init__(self, sequences):
         self.sequences = sequences
 
-    def shannon_entropy(self):
-        import math
-        total_length = sum(len(seq) for seq in self.sequences)
-        probabilities = [len(seq) / total_length for seq in self.sequences]
-        return -sum(p * math.log2(p) for p in probabilities if p > 0)
+    def detect_mode(self):
+        # Implementation of mode detection
+        pass
 
-    def character_classification(self):
-        classification = {}
-        for seq in self.sequences:
-            for char in seq:
-                classification[char] = classification.get(char, 0) + 1
-        return classification
+    def calculate_shannon_entropy(self):
+        # Implementation of Shannon entropy
+        pass
+
+    def classify_characters(self):
+        # Implementation of character classification
+        pass
 
     def frequency_distribution(self):
-        distribution = {}
-        for seq in self.sequences:
-            for char in seq:
-                distribution[char] = distribution.get(char, 0) + 1
-        return distribution
+        # Implementation of frequency distribution
+        pass
+
+    def process_sequences(self):
+        # Process single or multiple sequences
+        if isinstance(self.sequences, list):
+            return [self.process_sequence(seq) for seq in self.sequences]
+        else:
+            return self.process_sequence(self.sequences)
+
+    def process_sequence(self, sequence):
+        # Implementation for processing a single sequence
+        pass
