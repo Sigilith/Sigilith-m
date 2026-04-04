@@ -3,31 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Sigilith-M Dashboard{% endblock %}</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <title>Document</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-
-<nav class="nav">
-    <ul>
-        <li><a href="/dashboard">Dashboard</a></li>
-        <li><a href="/dashboard/clusters">Clusters</a></li>
-        <li><a href="/dashboard/drift">Drift</a></li>
-        <li><a href="/dashboard/about">About</a></li>
-    </ul>
-</nav>
-
-<header class="header">
-    <h1>{% block header %}{% endblock %}</h1>
-</header>
-
-<main class="content">
+    
     {% block content %}{% endblock %}
-</main>
 
-<footer class="footer">
-    <p>© 2026 Sigilith Labs. All rights reserved.</p>
-</footer>
-
+    {% block scripts %}{% endblock %}
 </body>
 </html>
