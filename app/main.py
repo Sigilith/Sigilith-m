@@ -1,1 +1,26 @@
-import { save_analysis, initialize_index, load_index } from app.storage\n\n# Initialize the index on startup\ninitialize_index()\n\n@app.route('/analyze', methods=['POST'])\ndef analyze():\n    data = request.get_json()\n    sequence = data.get('sequence')\n    persist = data.get('persist', True)\n    context = data.get('context')\n    result = perform_analysis(sequence)  # Assuming this function performs the analysis\n    response = {'result': result}  \n    if persist:\n        file_path = save_analysis(result, context)\n        response['file_path'] = file_path\n    return jsonify(response)\n\n@app.route('/index', methods=['GET'])\ndef index():\n    return jsonify(load_index())\n
+from fastapi import FastAPI, Request, Form
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from app import config
+from app.storage_backend import StorageBackend
+from app.analysis_wrapper import wrap_analysis
+
+app = FastAPI()
+
+# Setup Jinja2 templates
+templates = Jinja2Templates(directory="app/templates")
+
+@app.get("/", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
+@app.post("/analyze")
+async def analyze(request: Request, data: str = Form(...)):
+    # Process the incoming data
+    result = wrap_analysis(data)
+    return result
+
+def compute_statistics(data):
+    # Implement statistics computation logic here
+    pass
