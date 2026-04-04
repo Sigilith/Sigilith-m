@@ -1,47 +1,35 @@
-from abc import ABC, abstractmethod
+class StorageInterface:
+    def save_analysis(self, data):
+        pass  # Implement saving of analysis data
 
-class StorageInterface(ABC):
-    @abstractmethod
-    def save(self, data: dict) -> None:
-        """Saves data to the storage"""
-        pass
+    def load_analysis(self, id):
+        pass  # Implement loading of analysis data by id
 
-    @abstractmethod
-    def load(self, identifier: str) -> dict:
-        """Loads data from the storage by identifier"""
-        pass
+    def load_index(self):
+        pass  # Implement loading the index of analyses
 
-    @abstractmethod
-    def delete(self, identifier: str) -> None:
-        """Deletes data from the storage by identifier"""
-        pass
+    def delete_analysis(self, id):
+        pass  # Implement deleting analysis data by id
 
 
 class LocalStorage(StorageInterface):
-    def __init__(self, storage_file: str):
-        self.storage_file = storage_file
-        self._data = self._load_storage()
+    def __init__(self, storage_path):
+        self.storage_path = storage_path
 
-    def _load_storage(self) -> dict:
-        try:
-            with open(self.storage_file, 'r') as f:
-                import json
-                return json.load(f)
-        except FileNotFoundError:
-            return {}
-        except json.JSONDecodeError:
-            return {}
+    def save_analysis(self, data):
+        with open(f'{self.storage_path}/analysis.json', 'a') as file:
+            json.dump(data, file)  # Save analysis to a file
 
-    def save(self, data: dict) -> None:
-        self._data.update(data)
-        with open(self.storage_file, 'w') as f:
-            import json
-            json.dump(self._data, f)
+    def load_analysis(self, id):
+        with open(f'{self.storage_path}/analysis.json', 'r') as file:
+            data = json.load(file)
+            return data.get(id)  # Load specific analysis by id
 
-    def load(self, identifier: str) -> dict:
-        return self._data.get(identifier, {})
+    def load_index(self):
+        index = []
+        # Logic to generate on-disk index
+        return index
 
-    def delete(self, identifier: str) -> None:
-        if identifier in self._data:
-            del self._data[identifier]
-        self.save({})
+    def delete_analysis(self, id):
+        # Logic to delete analysis by id
+        pass
