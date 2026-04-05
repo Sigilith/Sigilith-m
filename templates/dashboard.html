@@ -1,58 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Overview</title>
+    <title>Sigilith-M Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 8px; background: #f5f5f5; margin: 5px 0; border-radius: 4px; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .stats { background: #e8f4f8; padding: 15px; border-radius: 4px; margin: 20px 0; }
+        form { margin: 20px 0; }
+        input, button { padding: 8px; margin: 5px 0; }
+        button { background: #0066cc; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #0052a3; }
+    </style>
 </head>
 <body>
-    <h1>System Overview</h1>
-    <section id="risk-distributions">
-        <h2>Risk Distributions</h2>
-        <div>
-            <!-- Dynamic content will be inserted here -->
-            {% for risk in risks %}
-                <p>{{ risk.name }}: {{ risk.value }}%</p>
+    <h1>Sigilith-M Analysis Dashboard</h1>
+
+    <div class="stats">
+        <h2>Summary Statistics</h2>
+        <p><strong>Total Analyses:</strong> {{ total_analyses }}</p>
+        <p><strong>Average Risk Score:</strong> {{ "%.2f"|format(avg_risk_score) }}</p>
+        <p><strong>Average Entropy:</strong> {{ "%.2f"|format(avg_entropy) }}</p>
+    </div>
+
+    <h2>Submit New Analysis</h2>
+    <form method="post" action="/analyze">
+        <input type="text" name="sequence" placeholder="Enter sequence" required>
+        <button type="submit">Analyze</button>
+    </form>
+
+    <h2>Stored Analyses</h2>
+    {% if analyses %}
+        <ul>
+            {% for item in analyses %}
+                <li>
+                    <a href="/analysis/{{ item.id }}">{{ item.id }}</a>
+                    <br>
+                    <small>{{ item.timestamp }} | Risk: <strong>{{ item.risk }}</strong> | Regime: <strong>{{ item.regime_class }}</strong></small>
+                </li>
             {% endfor %}
-        </div>
-    </section>
-    <section id="regime-distributions">
-        <h2>Regime Distributions</h2>
-        <div>
-            <!-- Dynamic content will be inserted here -->
-            {% for regime in regimes %}
-                <p>{{ regime.type }}: {{ regime.percentage }}%</p>
-            {% endfor %}
-        </div>
-    </section>
-    <section id="analysis-submission">
-        <h2>Submit Your Analysis</h2>
-        <form method="post" action="/submit-analysis">
-            <label for="analysis-name">Analysis Name:</label>
-            <input type="text" id="analysis-name" name="analysis-name" required><br>
-            <label for="analysis-data">Data:</label>
-            <textarea id="analysis-data" name="analysis-data" required></textarea><br>
-            <input type="submit" value="Submit">
-        </form>
-    </section>
-    <section id="recent-analyses">
-        <h2>Recent Analyses</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Analysis Name</th>
-                    <th>Submission Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for analysis in recentAnalyses %}
-                    <tr>
-                        <td>{{ analysis.name }}</td>
-                        <td>{{ analysis.date }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </section>
+        </ul>
+    {% else %}
+        <p>No analyses stored yet.</p>
+    {% endif %}
 </body>
 </html>
