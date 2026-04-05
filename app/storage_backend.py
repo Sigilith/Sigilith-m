@@ -21,8 +21,14 @@ class StorageBackend:
         with open(INDEX_FILE, "w") as f:
             json.dump(index, f)
 
+    @staticmethod
+    def _safe_id(analysis_id: str) -> str:
+        """Validate that analysis_id is a canonical UUID to prevent path traversal."""
+        return str(uuid.UUID(analysis_id))
+
     def save_analysis(self, analysis: dict) -> str:
-        analysis_id = analysis.get("id", str(uuid.uuid4()))
+        raw_id = analysis.get("id", str(uuid.uuid4()))
+        analysis_id = self._safe_id(raw_id)
         analysis["id"] = analysis_id
         path = os.path.join(DATA_DIR, f"{analysis_id}.json")
         with open(path, "w") as f:
@@ -34,7 +40,8 @@ class StorageBackend:
         return analysis_id
 
     def load_analysis(self, analysis_id: str) -> dict | None:
-        path = os.path.join(DATA_DIR, f"{analysis_id}.json")
+        safe_id = self._safe_id(analysis_id)
+        path = os.path.join(DATA_DIR, f"{safe_id}.json")
         if not os.path.exists(path):
             return None
         with open(path, "r") as f:
