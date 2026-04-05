@@ -1,21 +1,17 @@
-def normalize_risk(risk_value):
-    # Implement the logic to normalize the risk value
-    normalized_value = risk_value / 100  # Example normalization
-    return normalized_value
+import uuid
+
+from app import config
 
 
-def normalize_regime(regime_value):
-    # Implement the logic to normalize the regime value
-    normalized_value = (regime_value - 1) / 2  # Example normalization
-    return normalized_value
+def wrap_analysis(raw_output: dict) -> dict:
+    risk_score = raw_output.get("risk_score", 0.0)
+    transition_density = raw_output.get("transition_density", 0.0)
 
-
-def wrap_analysis(analysis_data, config):
-    # Implement the logic for wrapping analysis with standardized object structure
-    standardized_structure = {
-        'normalized_risk': normalize_risk(analysis_data['risk']),
-        'normalized_regime': normalize_regime(analysis_data['regime']),
-        'analysis_result': analysis_data['result'],
-        'config': config
+    return {
+        "id": str(uuid.uuid4()),
+        "entropy": raw_output.get("entropy", 0.0),
+        "transition_density": transition_density,
+        "risk_score": risk_score,
+        "risk": config.classify_risk(risk_score),
+        "regime_class": config.classify_regime(transition_density),
     }
-    return standardized_structure

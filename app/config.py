@@ -1,47 +1,23 @@
-# Sigilith-M Configuration
+HIGH_RISK_THRESHOLD = 0.7
+MEDIUM_RISK_THRESHOLD = 0.4
 
-## Storage Paths
-- **Data Path**: `/path/to/data`
-- **Model Path**: `/path/to/models`
+CHAOTIC_THRESHOLD = 0.7
+TRANSITIONAL_THRESHOLD = 0.4
 
-## Risk and Regime Classification Thresholds
-- **Risk Threshold**: 0.75
-- **Regime Classification Levels**:
-  - Low: 0.0 - 0.3
-  - Medium: 0.3 - 0.6
-  - High: 0.6 - 1.0
 
-## Dashboard Defaults
-- **Default View**: Dashboard 1
-- **Refresh Interval**: 5 minutes
-
-## Terrain Engine Parameters
-- **Resolution**: 30m
-- **Analysis Type**: Global
-
-## Utility Functions
-
-### Classify Risk
-```python
-def classify_risk(value):
-    if value < 0.3:
-        return "Low"
-    elif value < 0.6:
-        return "Medium"
+def classify_risk(risk_score: float) -> str:
+    if risk_score >= HIGH_RISK_THRESHOLD:
+        return "HIGH"
+    elif risk_score >= MEDIUM_RISK_THRESHOLD:
+        return "MEDIUM"
     else:
-        return "High"
-```
+        return "LOW"
 
-### Classify Regime
-```python
-def classify_regime(value):
-    if value < 0.3:
-        return "Stable"
-    elif value < 0.6:
-        return "Unstable"
+
+def classify_regime(transition_density: float) -> str:
+    if transition_density >= CHAOTIC_THRESHOLD:
+        return "chaotic"
+    elif transition_density >= TRANSITIONAL_THRESHOLD:
+        return "transitional"
     else:
-        return "Critical"
-```
-
-# Notes
-This configuration file provides the necessary settings for managing the Sigilith-M application, including essential storage paths, thresholds, and classifications.
+        return "stable"

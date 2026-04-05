@@ -1,68 +1,50 @@
-# Complete File-Based Storage Implementation
-
-## Overview
-This implementation manages file-based storage, ensuring effective directory management, index handling, and analysis persistence.
-
-## Directory Management
-- **Create Directories:** Automatically create necessary directories if they do not exist.
-- **Manage Structure:** Ensure a consistent directory structure for storing data files and indices.
-
-## Index Handling
-- **Creation of Indices:** Automatically generate indices for quick data retrieval.
-- **Updating Indices:** Maintain indices during data updates to reflect recent changes.
-
-## Analysis Persistence
-- **Save Analysis Results:** Store output analysis results in files, ensuring they are persisted for future references.
-- **Load Analysis Data:** Enable loading of previously stored analysis results efficiently.
-
-## Implementation Details
-
-### Example Implementation Code:
-```python
-import os
 import json
+import os
+import uuid
 
-class StorageManager:
-    def __init__(self, base_directory):
-        self.base_directory = base_directory
-        self._create_directory(self.base_directory)
-        self.index_file = os.path.join(self.base_directory, 'index.json')
-        self.indices = self._load_index()
+DATA_DIR = "data"
+INDEX_FILE = os.path.join(DATA_DIR, "index.json")
 
-    def _create_directory(self, directory):
-        if not os.path.exists(directory):
-            os.makedirs(directory)
 
-    def _load_index(self):
-        if os.path.exists(self.index_file):
-            with open(self.index_file, 'r') as f:
-                return json.load(f)
-        return {}
+class StorageBackend:
+    def __init__(self):
+        os.makedirs(DATA_DIR, exist_ok=True)
+        if not os.path.exists(INDEX_FILE):
+            with open(INDEX_FILE, "w") as f:
+                json.dump([], f)
 
-    def save_analysis(self, analysis_name, data):
-        analysis_path = os.path.join(self.base_directory, f'{analysis_name}.json')
-        with open(analysis_path, 'w') as f:
-            json.dump(data, f)
-        self._update_index(analysis_name)
+    def _load_index(self) -> list:
+        with open(INDEX_FILE, "r") as f:
+            return json.load(f)
 
-    def _update_index(self, analysis_name):
-        self.indices[analysis_name] = os.path.join(self.base_directory, f'{analysis_name}.json')
-        with open(self.index_file, 'w') as f:
-            json.dump(self.indices, f)
+    def _save_index(self, index: list) -> None:
+        with open(INDEX_FILE, "w") as f:
+            json.dump(index, f)
 
-    def load_analysis(self, analysis_name):
-        analysis_path = self.indices.get(analysis_name)
-        if analysis_path and os.path.exists(analysis_path):
-            with open(analysis_path, 'r') as f:
-                return json.load(f)
-        return None
+    def save_analysis(self, analysis: dict) -> str:
+        analysis_id = analysis.get("id", str(uuid.uuid4()))
+        analysis["id"] = analysis_id
+        path = os.path.join(DATA_DIR, f"{analysis_id}.json")
+        with open(path, "w") as f:
+            json.dump(analysis, f)
+        index = self._load_index()
+        if analysis_id not in index:
+            index.append(analysis_id)
+            self._save_index(index)
+        return analysis_id
 
-# Example Usage
-storage = StorageManager('data_storage')
-result_data = {'key': 'value'}
-storage.save_analysis('my_analysis', result_data)
-retrieved_data = storage.load_analysis('my_analysis')
-print(retrieved_data)
-```
+    def load_analysis(self, analysis_id: str) -> dict | None:
+        path = os.path.join(DATA_DIR, f"{analysis_id}.json")
+        if not os.path.exists(path):
+            return None
+        with open(path, "r") as f:
+            return json.load(f)
 
-This code snippet demonstrates how to effectively manage storage, create directories, and handle analysis data using JSON files.
+    def load_all_analyses(self) -> list:
+        index = self._load_index()
+        analyses = []
+        for analysis_id in index:
+            analysis = self.load_analysis(analysis_id)
+            if analysis:
+                analyses.append(analysis)
+        return analyses
