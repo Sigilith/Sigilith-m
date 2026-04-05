@@ -1,3 +1,7 @@
 def normalize_sequence(sequence):
     """Normalize input sequence."""
-    return sequence.strip() if isinstance(sequence, str) else []
+    if isinstance(sequence, str):
+        return sequence.strip()
+    if isinstance(sequence, list):
+        return sequence
+    return []
