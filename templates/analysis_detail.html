@@ -1,10 +1,20 @@
+<!DOCTYPE html>
 <html>
 <head>
-    <title>Analysis Detail</title>
+    <title>Analysis {{ analysis.id }}</title>
 </head>
 <body>
-    <h1>Analysis Details</h1>
-    <p>This section displays detailed information related to the analysis.</p>
-    <p>Date and Time of Analysis: 2026-04-04 18:19:53 UTC</p>
+    <h1>Analysis {{ analysis.id }}</h1>
+
+    <p><strong>Timestamp:</strong> {{ analysis.timestamp }}</p>
+    <p><strong>Risk:</strong> {{ analysis.risk }}</p>
+    <p><strong>Regime Class:</strong> {{ analysis.regime_class }}</p>
+    <p><strong>Entropy:</strong> {{ analysis.entropy }}</p>
+    <p><strong>Transition Density:</strong> {{ analysis.transition_density }}</p>
+
+    <h2>Sequence</h2>
+    <pre>{{ analysis.sequence }}</pre>
+
+    <p><a href="/">Back to Dashboard</a></p>
 </body>
 </html>

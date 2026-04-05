@@ -1,58 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Overview</title>
+    <title>Sigilith-M Dashboard</title>
 </head>
 <body>
-    <h1>System Overview</h1>
-    <section id="risk-distributions">
-        <h2>Risk Distributions</h2>
-        <div>
-            <!-- Dynamic content will be inserted here -->
-            {% for risk in risks %}
-                <p>{{ risk.name }}: {{ risk.value }}%</p>
-            {% endfor %}
-        </div>
-    </section>
-    <section id="regime-distributions">
-        <h2>Regime Distributions</h2>
-        <div>
-            <!-- Dynamic content will be inserted here -->
-            {% for regime in regimes %}
-                <p>{{ regime.type }}: {{ regime.percentage }}%</p>
-            {% endfor %}
-        </div>
-    </section>
-    <section id="analysis-submission">
-        <h2>Submit Your Analysis</h2>
-        <form method="post" action="/submit-analysis">
-            <label for="analysis-name">Analysis Name:</label>
-            <input type="text" id="analysis-name" name="analysis-name" required><br>
-            <label for="analysis-data">Data:</label>
-            <textarea id="analysis-data" name="analysis-data" required></textarea><br>
-            <input type="submit" value="Submit">
-        </form>
-    </section>
-    <section id="recent-analyses">
-        <h2>Recent Analyses</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Analysis Name</th>
-                    <th>Submission Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for analysis in recentAnalyses %}
-                    <tr>
-                        <td>{{ analysis.name }}</td>
-                        <td>{{ analysis.date }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </section>
+    <h1>Sigilith-M Analysis Dashboard</h1>
+
+    <h2>Submit Analysis</h2>
+    <form method="post" action="/analyze">
+        <label for="sequence">Sequence:</label>
+        <input type="text" id="sequence" name="sequence" required>
+        <input type="submit" value="Analyze">
+    </form>
+
+    <h2>Stored Analyses</h2>
+    <ul>
+        {% for item in analyses %}
+            <li>
+                <a href="/analysis/{{ item.id }}">{{ item.id }}</a>
+                — {{ item.timestamp }}
+            </li>
+        {% endfor %}
+    </ul>
 </body>
 </html>
