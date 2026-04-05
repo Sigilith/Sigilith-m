@@ -1,11 +1,12 @@
 # app/config.py
 
 # Configuration constants
-RISK_THRESHOLD = 0.7  # Example threshold for risk classification
+RISK_THRESHOLD = 0.7  # Threshold above which risk is HIGH
+RISK_MEDIUM_THRESHOLD = 0.4  # Threshold above which risk is MEDIUM
 REGIME_LEVELS = {
-    'Bull Market': (0.7, 1.0),
-    'Bear Market': (0.0, 0.3),
-    'Sideways Market': (0.3, 0.7),
+    'stable': (0.0, 0.3),
+    'transitional': (0.3, 0.7),
+    'chaotic': (0.7, 1.0),
 }
 
 def classify_risk(score):
@@ -16,24 +17,26 @@ def classify_risk(score):
     score (float): The risk score to be classified.
 
     Returns:
-    str: A classification of the risk level.
+    str: 'HIGH', 'MEDIUM', or 'LOW'
     """
     if score >= RISK_THRESHOLD:
-        return "High Risk"
+        return "HIGH"
+    elif score >= RISK_MEDIUM_THRESHOLD:
+        return "MEDIUM"
     else:
-        return "Low Risk"
+        return "LOW"
 
 def classify_regime(score):
     """
-    Classifies the market regime based on the provided score.
+    Classifies the regime based on the provided entropy score.
 
     Parameters:
-    score (float): The market score to be classified.
+    score (float): The entropy score to be classified.
 
     Returns:
-    str: A classification of the market regime.
+    str: 'stable', 'transitional', or 'chaotic'
     """
     for regime, (lower, upper) in REGIME_LEVELS.items():
-        if lower <= score < upper:
+        if lower <= score <= upper:
             return regime
-    return "Unknown"
+    return "chaotic"
