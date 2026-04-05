@@ -1,47 +1,39 @@
-# Sigilith-M Configuration
+# app/config.py
 
-## Storage Paths
-- **Data Path**: `/path/to/data`
-- **Model Path**: `/path/to/models`
+# Configuration constants
+RISK_THRESHOLD = 0.7  # Example threshold for risk classification
+REGIME_LEVELS = {
+    'Bull Market': (0.7, 1.0),
+    'Bear Market': (0.0, 0.3),
+    'Sideways Market': (0.3, 0.7),
+}
 
-## Risk and Regime Classification Thresholds
-- **Risk Threshold**: 0.75
-- **Regime Classification Levels**:
-  - Low: 0.0 - 0.3
-  - Medium: 0.3 - 0.6
-  - High: 0.6 - 1.0
+def classify_risk(score):
+    """
+    Classifies the risk level based on the provided score.
 
-## Dashboard Defaults
-- **Default View**: Dashboard 1
-- **Refresh Interval**: 5 minutes
+    Parameters:
+    score (float): The risk score to be classified.
 
-## Terrain Engine Parameters
-- **Resolution**: 30m
-- **Analysis Type**: Global
-
-## Utility Functions
-
-### Classify Risk
-```python
-def classify_risk(value):
-    if value < 0.3:
-        return "Low"
-    elif value < 0.6:
-        return "Medium"
+    Returns:
+    str: A classification of the risk level.
+    """
+    if score >= RISK_THRESHOLD:
+        return "High Risk"
     else:
-        return "High"
-```
+        return "Low Risk"
 
-### Classify Regime
-```python
-def classify_regime(value):
-    if value < 0.3:
-        return "Stable"
-    elif value < 0.6:
-        return "Unstable"
-    else:
-        return "Critical"
-```
+def classify_regime(score):
+    """
+    Classifies the market regime based on the provided score.
 
-# Notes
-This configuration file provides the necessary settings for managing the Sigilith-M application, including essential storage paths, thresholds, and classifications.
+    Parameters:
+    score (float): The market score to be classified.
+
+    Returns:
+    str: A classification of the market regime.
+    """
+    for regime, (lower, upper) in REGIME_LEVELS.items():
+        if lower <= score < upper:
+            return regime
+    return "Unknown"
