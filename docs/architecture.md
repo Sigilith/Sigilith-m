@@ -1,3 +1,12 @@
+{% include sidebar.html %}
+<div style="margin-left: 260px;">
+
+<button onclick="toggleTheme()" style="position: fixed; right: 20px; top: 20px; z-index: 999;">
+  Toggle Theme
+</button>
+<script src="assets/theme.js"></script>
+<link rel="stylesheet" href="assets/theme.css">
+
 # Architecture Overview
 
 ## System Flow
@@ -26,4 +35,7 @@ The system flow consists of several interconnected modules that work together to
 │   │   └── reporting
 │   └── data_management
 └── tests
-`
+```
+
+{% include footer.html %}
+</div>
