@@ -1,68 +1,56 @@
-# Complete File-Based Storage Implementation
-
-## Overview
-This implementation manages file-based storage, ensuring effective directory management, index handling, and analysis persistence.
-
-## Directory Management
-- **Create Directories:** Automatically create necessary directories if they do not exist.
-- **Manage Structure:** Ensure a consistent directory structure for storing data files and indices.
-
-## Index Handling
-- **Creation of Indices:** Automatically generate indices for quick data retrieval.
-- **Updating Indices:** Maintain indices during data updates to reflect recent changes.
-
-## Analysis Persistence
-- **Save Analysis Results:** Store output analysis results in files, ensuring they are persisted for future references.
-- **Load Analysis Data:** Enable loading of previously stored analysis results efficiently.
-
-## Implementation Details
-
-### Example Implementation Code:
-```python
-import os
 import json
+import uuid
+from pathlib import Path
 
-class StorageManager:
-    def __init__(self, base_directory):
-        self.base_directory = base_directory
-        self._create_directory(self.base_directory)
-        self.index_file = os.path.join(self.base_directory, 'index.json')
+
+class StorageBackend:
+    """File-based storage for analysis results."""
+
+    def __init__(self, base_dir: str = "data_storage"):
+        self.base_dir = Path(base_dir)
+        self.base_dir.mkdir(exist_ok=True)
+        self.index_file = self.base_dir / "index.json"
         self.indices = self._load_index()
 
-    def _create_directory(self, directory):
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-    def _load_index(self):
-        if os.path.exists(self.index_file):
+    def _load_index(self) -> dict:
+        if self.index_file.exists():
             with open(self.index_file, 'r') as f:
                 return json.load(f)
         return {}
 
-    def save_analysis(self, analysis_name, data):
-        analysis_path = os.path.join(self.base_directory, f'{analysis_name}.json')
-        with open(analysis_path, 'w') as f:
-            json.dump(data, f)
-        self._update_index(analysis_name)
-
-    def _update_index(self, analysis_name):
-        self.indices[analysis_name] = os.path.join(self.base_directory, f'{analysis_name}.json')
+    def _update_index(self):
         with open(self.index_file, 'w') as f:
             json.dump(self.indices, f)
 
-    def load_analysis(self, analysis_name):
-        analysis_path = self.indices.get(analysis_name)
-        if analysis_path and os.path.exists(analysis_path):
+    def _safe_id(self, analysis_id: str) -> str:
+        """Validate analysis_id as UUID to prevent path injection."""
+        try:
+            uuid.UUID(analysis_id)
+            return analysis_id
+        except (ValueError, AttributeError):
+            raise ValueError(f"Invalid analysis ID format: {analysis_id}")
+
+    def save_analysis(self, analysis: dict) -> str:
+        analysis_id = self._safe_id(analysis["id"])
+        analysis_path = self.base_dir / f"{analysis_id}.json"
+        with open(analysis_path, 'w') as f:
+            json.dump(analysis, f)
+        self.indices[analysis_id] = str(analysis_path)
+        self._update_index()
+        return analysis_id
+
+    def load_analysis(self, analysis_id: str) -> dict:
+        analysis_id = self._safe_id(analysis_id)
+        analysis_path = self.indices.get(analysis_id)
+        if analysis_path and Path(analysis_path).exists():
             with open(analysis_path, 'r') as f:
                 return json.load(f)
         return None
 
-# Example Usage
-storage = StorageManager('data_storage')
-result_data = {'key': 'value'}
-storage.save_analysis('my_analysis', result_data)
-retrieved_data = storage.load_analysis('my_analysis')
-print(retrieved_data)
-```
-
-This code snippet demonstrates how to effectively manage storage, create directories, and handle analysis data using JSON files.
+    def load_all_analyses(self) -> list:
+        analyses = []
+        for analysis_id in self.indices:
+            analysis = self.load_analysis(analysis_id)
+            if analysis:
+                analyses.append(analysis)
+        return analyses
