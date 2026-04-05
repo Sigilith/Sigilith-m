@@ -1,6 +1,20 @@
-# Sigilith-M
+# Sigilith‑M
 
-A sequence analysis engine for structural pattern detection, stability assessment, and risk classification. Detects behavioral patterns in sequences through multi-stage analysis: normalization, segmentation, transformation testing, signature computation, and risk scoring.
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-Framework-green)
+![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+![Platform](https://img.shields.io/badge/Platform-GitHub%20Codespaces-lightgrey)
+
+Sigilith‑M is a symbolic sequence analysis engine designed to compute entropy, transition density, structural risk, and regime classification.
+
+It provides a full end‑to‑end pipeline:
+
+```
+sequence → normalize → segment → transform → signature → score → vectorize → wrap → store → display
+```
+
+Built with FastAPI, Jinja2, and a modular analysis engine, Sigilith‑M is designed for research‑grade symbolic cognition experiments and structural risk modelling.
 
 ## Features
 
