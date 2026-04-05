@@ -20,7 +20,9 @@ from app.storage_backend import StorageBackend
 from app.analysis_wrapper import wrap_analysis
 from app.engine import analyze_sequence
 
-import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 storage = StorageBackend()
@@ -153,7 +155,7 @@ async def analyze(request: Request, sequence: str = Form(...)):
 
     except Exception as e:
         # Log error and return error response
-        print(f"Analysis error: {str(e)}")
+        logger.error("Analysis error: %s", str(e))
         analyses = storage.load_all_analyses()
         stats = compute_statistics(analyses)
         return templates.TemplateResponse(

@@ -37,6 +37,6 @@ def classify_regime(score):
     str: 'stable', 'transitional', or 'chaotic'
     """
     for regime, (lower, upper) in REGIME_LEVELS.items():
-        if lower <= score < upper:
+        if lower <= score <= upper:
             return regime
     return "chaotic"
