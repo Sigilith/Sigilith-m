@@ -18,6 +18,7 @@ from fastapi.templating import Jinja2Templates
 from app import config
 from app.storage_backend import StorageBackend
 from app.analysis_wrapper import wrap_analysis
+from app.engine import analyze_sequence
 
 import json
 
@@ -106,22 +107,70 @@ async def dashboard(request: Request):
 @app.post("/analyze", response_class=HTMLResponse)
 async def analyze(request: Request, sequence: str = Form(...)):
     """
-    Accepts a sequence, runs the analysis engine (mocked for now),
-    wraps the result, stores it, and returns the updated dashboard.
+    Full pipeline:
+    1. Validate input
+    2. Run engine.analyze_sequence()
+    3. Wrap output with metadata
+    4. Store in backend
+    5. Return updated dashboard
     """
+    # Validate input
+    if not sequence or not isinstance(sequence, str):
+        analyses = storage.load_all_analyses()
+        stats = compute_statistics(analyses)
+        return templates.TemplateResponse(
+            "dashboard.html",
+            {
+                "request": request,
+                "analyses": analyses,
+                "total_analyses": stats["total"],
+                "avg_risk_score": stats["avg_risk"],
+                "avg_entropy": stats["avg_entropy"],
+                "risk_counts": stats["risk_counts"],
+                "regime_counts": stats["regime_counts"],
+                "error": "Sequence cannot be empty",
+            },
+        )
 
-    # Placeholder engine output — replace with real engine later
-    raw_output = {
-        "entropy": 0.42,
-        "transition_density": 0.58,
-        "risk_score": 0.51,
-        "risk": None,
-        "regime_class": None,
-    }
+    try:
+        # Run full pipeline: normalize → segment → transform → signature → score → vectorize
+        engine_output = analyze_sequence(sequence)
 
-    wrapped = wrap_analysis(raw_output)
-    storage.save_analysis(wrapped)
+        # Combine engine output with sequence
+        raw_output = {
+            **engine_output.get("signature", {}),
+            "sequence": sequence,
+            "risk_score": engine_output.get("risk", {}).get("score", 0.5),
+            "vector": engine_output.get("vector", []),
+            "summary": engine_output.get("summary", ""),
+        }
 
+        # Wrap with metadata (UUID, timestamp, classification)
+        wrapped = wrap_analysis(raw_output)
+
+        # Store analysis
+        storage.save_analysis(wrapped)
+
+    except Exception as e:
+        # Log error and return error response
+        print(f"Analysis error: {str(e)}")
+        analyses = storage.load_all_analyses()
+        stats = compute_statistics(analyses)
+        return templates.TemplateResponse(
+            "dashboard.html",
+            {
+                "request": request,
+                "analyses": analyses,
+                "total_analyses": stats["total"],
+                "avg_risk_score": stats["avg_risk"],
+                "avg_entropy": stats["avg_entropy"],
+                "risk_counts": stats["risk_counts"],
+                "regime_counts": stats["regime_counts"],
+                "error": f"Analysis failed: {str(e)}",
+            },
+        )
+
+    # Load all and return updated dashboard
     analyses = storage.load_all_analyses()
     stats = compute_statistics(analyses)
 
