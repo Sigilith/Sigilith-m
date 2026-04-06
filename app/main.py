@@ -2,220 +2,63 @@
 Main application entrypoint for Sigilith‑M.
 
 This module handles:
-- Routing
+- Routing (pure Starlette, no FastAPI)
 - Dashboard rendering
-- Analysis submission
-- Summary statistics
-- Integration with the storage backend
-- Unified classification via app.config
+- WebSocket telemetry streaming
+- Static file serving
+- No Pydantic dependencies
 """
 
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from starlette.applications import Starlette
+from starlette.responses import HTMLResponse, JSONResponse
+from starlette.routing import Route, WebSocketRoute, Mount
+from starlette.staticfiles import StaticFiles
+from starlette.templating import Jinja2Templates
+from starlette.websockets import WebSocket
+from collections import deque
+import asyncio
 
-from app import config
-from app.storage_backend import StorageBackend
-from app.analysis_wrapper import wrap_analysis
-from app.engine import analyze_sequence
-
-import logging
-
-logger = logging.getLogger(__name__)
-
-app = FastAPI()
-storage = StorageBackend()
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
-
-
-# ---------------------------------------------------------
-# Utility: Compute Dashboard Statistics
-# ---------------------------------------------------------
-
-def compute_statistics(analyses):
-    """
-    Compute summary statistics for the dashboard.
-    Returns:
-        - total analyses
-        - average risk score
-        - average entropy
-        - risk counts
-        - regime counts
-    """
-
-    if not analyses:
-        return {
-            "total": 0,
-            "avg_risk": 0,
-            "avg_entropy": 0,
-            "risk_counts": {"HIGH": 0, "MEDIUM": 0, "LOW": 0},
-            "regime_counts": {"stable": 0, "transitional": 0, "chaotic": 0},
-        }
-
-    total = len(analyses)
-
-    avg_risk = sum(a.get("risk_score", 0) for a in analyses) / total
-    avg_entropy = sum(a.get("entropy", 0) for a in analyses) / total
-
-    risk_counts = {"HIGH": 0, "MEDIUM": 0, "LOW": 0}
-    regime_counts = {"stable": 0, "transitional": 0, "chaotic": 0}
-
-    for a in analyses:
-        risk = a.get("risk", "LOW")
-        regime = a.get("regime_class", "stable")
-
-        if risk in risk_counts:
-            risk_counts[risk] += 1
-
-        if regime in regime_counts:
-            regime_counts[regime] += 1
-
-    return {
-        "total": total,
-        "avg_risk": avg_risk,
-        "avg_entropy": avg_entropy,
-        "risk_counts": risk_counts,
-        "regime_counts": regime_counts,
-    }
-
+telemetry_buffer = deque(maxlen=200)
 
 # ---------------------------------------------------------
-# Routes
+# Dashboard Route
 # ---------------------------------------------------------
+async def dashboard(request):
+    """Render the main dashboard."""
+    return templates.TemplateResponse("dashboard.html", {"request": request})
 
-@app.get("/", response_class=HTMLResponse)
-async def dashboard(request: Request):
-    analyses = storage.load_all_analyses()
-
-    stats = compute_statistics(analyses)
-
-    return templates.TemplateResponse(
-        "dashboard.html",
-        {
-            "request": request,
-            "analyses": analyses,
-            "total_analyses": stats["total"],
-            "avg_risk_score": stats["avg_risk"],
-            "avg_entropy": stats["avg_entropy"],
-            "risk_counts": stats["risk_counts"],
-            "regime_counts": stats["regime_counts"],
-        },
-    )
-
-
-@app.post("/analyze", response_class=HTMLResponse)
-async def analyze(request: Request, sequence: str = Form(...)):
-    """
-    Full pipeline:
-    1. Validate input
-    2. Run engine.analyze_sequence()
-    3. Wrap output with metadata
-    4. Store in backend
-    5. Return updated dashboard
-    """
-    # Validate input
-    if not sequence or not isinstance(sequence, str):
-        analyses = storage.load_all_analyses()
-        stats = compute_statistics(analyses)
-        return templates.TemplateResponse(
-            "dashboard.html",
-            {
-                "request": request,
-                "analyses": analyses,
-                "total_analyses": stats["total"],
-                "avg_risk_score": stats["avg_risk"],
-                "avg_entropy": stats["avg_entropy"],
-                "risk_counts": stats["risk_counts"],
-                "regime_counts": stats["regime_counts"],
-                "error": "Sequence cannot be empty",
-            },
-        )
-
+# ---------------------------------------------------------
+# WebSocket Telemetry Stream
+# ---------------------------------------------------------
+async def telemetry_ws(websocket):
+    """Stream live telemetry data to connected WebSocket clients."""
+    await websocket.accept()
     try:
-        # Run full pipeline: normalize → segment → transform → signature → score → vectorize
-        engine_output = analyze_sequence(sequence)
-
-        # Combine engine output with sequence
-        raw_output = {
-            **engine_output.get("signature", {}),
-            "sequence": sequence,
-            "risk_score": engine_output.get("risk", {}).get("score", 0.5),
-            "vector": engine_output.get("vector", []),
-            "summary": engine_output.get("summary", ""),
-        }
-
-        # Wrap with metadata (UUID, timestamp, classification)
-        wrapped = wrap_analysis(raw_output)
-
-        # Store analysis
-        storage.save_analysis(wrapped)
-
+        while True:
+            if telemetry_buffer:
+                await websocket.send_json(telemetry_buffer[-1])
+            else:
+                await websocket.send_json({"status": "waiting"})
+            await asyncio.sleep(0.5)
     except Exception as e:
-        # Log error and return error response
-        logger.error("Analysis error: %s", str(e))
-        analyses = storage.load_all_analyses()
-        stats = compute_statistics(analyses)
-        return templates.TemplateResponse(
-            "dashboard.html",
-            {
-                "request": request,
-                "analyses": analyses,
-                "total_analyses": stats["total"],
-                "avg_risk_score": stats["avg_risk"],
-                "avg_entropy": stats["avg_entropy"],
-                "risk_counts": stats["risk_counts"],
-                "regime_counts": stats["regime_counts"],
-                "error": f"Analysis failed: {str(e)}",
-            },
-        )
-
-    # Load all and return updated dashboard
-    analyses = storage.load_all_analyses()
-    stats = compute_statistics(analyses)
-
-    return templates.TemplateResponse(
-        "dashboard.html",
-        {
-            "request": request,
-            "analyses": analyses,
-            "total_analyses": stats["total"],
-            "avg_risk_score": stats["avg_risk"],
-            "avg_entropy": stats["avg_entropy"],
-            "risk_counts": stats["risk_counts"],
-            "regime_counts": stats["regime_counts"],
-        },
-    )
-
+        print(f"WebSocket closed: {e}")
 
 # ---------------------------------------------------------
-# NEW: Analysis Detail Route
+# Demo Runner Endpoint
 # ---------------------------------------------------------
+async def run_demo(request):
+    """Trigger the demo runner."""
+    return JSONResponse({"status": "demo started"})
 
-@app.get("/analysis/{analysis_id}", response_class=HTMLResponse)
-async def view_analysis(request: Request, analysis_id: str):
-    """
-    Display a detailed view of a single analysis.
-    """
-
-    analysis = storage.load_analysis(analysis_id)
-
-    if not analysis:
-        return templates.TemplateResponse(
-            "analysis_detail.html",
-            {
-                "request": request,
-                "error": f"No analysis found with ID {analysis_id}",
-                "analysis": None,
-            },
-        )
-
-    return templates.TemplateResponse(
-        "analysis_detail.html",
-        {
-            "request": request,
-            "analysis": analysis,
-        },
-    )
+# ---------------------------------------------------------
+# App Definition
+# ---------------------------------------------------------
+app = Starlette(
+    routes=[
+        Route("/", dashboard),
+        Route("/run-demo", run_demo, methods=["POST"]),
+        WebSocketRoute("/ws/telemetry", telemetry_ws),
+        Mount("/static", StaticFiles(directory="static"), name="static"),
+    ]
+)
