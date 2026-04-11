@@ -5,3 +5,7 @@ pydantic==2.5.0
 pydantic-settings==2.1.0
 numpy==1.24.3
 python-multipart==0.0.22
+regex
+networkx
+rich
+matplotlib
