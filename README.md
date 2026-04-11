@@ -40,6 +40,27 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+### Termux (Android)
+
+Termux cannot build numpy from source, so it must be installed via the Termux package manager before running pip.
+
+```bash
+# Install prerequisites via Termux package manager
+pkg install git python python-numpy
+
+# Clone repository
+git clone https://github.com/Sigilith/Sigilith-m.git
+cd Sigilith-m
+
+# Install remaining Python dependencies
+pip install -r requirements.txt
+```
+
+> **Tip:** You can also use the included `termux-setup.sh` script to automate the full setup:
+> ```bash
+> bash termux-setup.sh
+> ```
+
 ## Usage
 
 ### Start Web Server
