@@ -1,7 +1,7 @@
 # Sigilith‑M
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-Framework-green)
+![Starlette](https://img.shields.io/badge/Starlette-Framework-green)
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 ![Platform](https://img.shields.io/badge/Platform-GitHub%20Codespaces-lightgrey)
@@ -14,7 +14,7 @@ It provides a full end‑to‑end pipeline:
 sequence → normalize → segment → transform → signature → score → vectorize → wrap → store → display
 ```
 
-Built with FastAPI, Jinja2, and a modular analysis engine, Sigilith‑M is designed for research‑grade symbolic cognition experiments and structural risk modelling.
+Built with Starlette, Jinja2, and a modular analysis engine, Sigilith‑M is designed for research‑grade symbolic cognition experiments and structural risk modelling.
 
 ## Features
 
@@ -23,7 +23,7 @@ Built with FastAPI, Jinja2, and a modular analysis engine, Sigilith‑M is desig
 - **Regime Detection**: Stable, Transitional, Chaotic regimes based on entropy
 - **Web Dashboard**: Real-time visualization of analyses
 - **Persistent Storage**: File-based JSON storage with UUID indexing
-- **FastAPI**: Modern async web framework with automatic API docs
+- **Starlette**: Lightweight async web framework
 
 ## Installation
 
@@ -71,7 +71,6 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 Then visit:
 - **Dashboard**: http://localhost:8000/
-- **API Docs**: http://localhost:8000/docs
 
 ### Analyze a Sequence
 
@@ -96,7 +95,6 @@ http://localhost:8000/analysis/{analysis_id}
 | `/` | GET | Dashboard with all analyses |
 | `/analyze` | POST | Submit sequence for analysis |
 | `/analysis/{id}` | GET | View single analysis detail |
-| `/docs` | GET | Interactive API documentation |
 
 ## Architecture
 
