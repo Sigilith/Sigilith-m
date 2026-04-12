@@ -10,13 +10,15 @@ This module handles:
 """
 
 from starlette.applications import Starlette
-from starlette.responses import HTMLResponse, JSONResponse
+from starlette.responses import JSONResponse
 from starlette.routing import Route, WebSocketRoute, Mount
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 from starlette.websockets import WebSocket
 from collections import deque
 import asyncio
+
+from app.routers.analysis import analyze, analysis_detail
 
 templates = Jinja2Templates(directory="templates")
 telemetry_buffer = deque(maxlen=200)
@@ -58,6 +60,8 @@ app = Starlette(
     routes=[
         Route("/", dashboard),
         Route("/run-demo", run_demo, methods=["POST"]),
+        Route("/analyze", analyze, methods=["POST"]),
+        Route("/analysis/{analysis_id}", analysis_detail, methods=["GET"]),
         WebSocketRoute("/ws/telemetry", telemetry_ws),
         Mount("/static", StaticFiles(directory="static"), name="static"),
     ]
