@@ -21,7 +21,7 @@ pip install -r requirements.txt
 
 ---
 
-## 2. Run the FastAPI Server
+## 2. Run the Starlette Server
 
 ```bash
 uvicorn app.main:app --reload
