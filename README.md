@@ -95,6 +95,50 @@ http://localhost:8000/analysis/{analysis_id}
 | `/` | GET | Dashboard with all analyses |
 | `/analyze` | POST | Submit sequence for analysis |
 | `/analysis/{id}` | GET | View single analysis detail |
+| `/snapshot` | GET | Return contents of `snapshot.json` |
+| `/update` | POST | Merge changes into `snapshot.json` |
+
+### Snapshot API
+
+#### `GET /snapshot`
+
+Returns the current contents of `snapshot.json`. If the file does not exist it is
+created automatically with the default value `{"site": {}, "version": 1}`.
+
+```bash
+curl http://localhost:8000/snapshot
+# {"site": {}, "version": 1}
+```
+
+#### `POST /update`
+
+Accepts a JSON payload with two fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `update` | boolean | When `false` no changes are made |
+| `changes` | object | Key/value pairs to merge into `snapshot.json` |
+
+```bash
+# No-op (update=false)
+curl -X POST http://localhost:8000/update \
+  -H "Content-Type: application/json" \
+  -d '{"update": false, "changes": {}}'
+# {"status": "no changes"}
+
+# Apply changes
+curl -X POST http://localhost:8000/update \
+  -H "Content-Type: application/json" \
+  -d '{"update": true, "changes": {"site": {"title": "My Site"}}}'
+# {"status": "updated"}
+```
+
+### Running the Snapshot API locally
+
+```bash
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
 
 ## Architecture
 
